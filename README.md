@@ -25,12 +25,13 @@ You might need to install the `requests` module, using `pip install requests`.
 ## How to use it
 **$ python alert_head_block_freshness.py -h**
 
-usage: alert_head_block_freshness.py [-h] [-he HTTP_ENDPOINT] [-dl] -ae ALERT_EMAIL -as SLACKTEE
+usage: `alert_head_block_freshness.py [-h] [-he HTTP_ENDPOINT] [-dl] -ae ALERT_EMAIL -as SLACKTEE`
 
 Check data freshness of a given blockchain based on http/s call
 
 optional arguments:
 
+```
   -h, --help            show this help message and exit
   
   
@@ -39,16 +40,18 @@ optional arguments:
                         
   -dl, --disable_lock
                         disable the notification lock, alerts will always be sent
+```
 
 
-required arguments (at least one of --alert_email and  is required):
+required arguments (at least one of --alert_email and --alert_slack is required):
 
+```
   -ae ALERT_EMAIL, --alert_email ALERT_EMAIL
                         email address to send alert to
 
-  -as SLACKTEE, --alert_slack SLACKTEE
+  -as ALERT_SLACK, --alert_slack ALERT_SLACK
                         path to the slacktee executable (always use the full path for cronjobs)
-
+```
 
 ## Alert example
 **$ python alert_head_block_freshness.py --alert_email sanford.young@gmail.com**
