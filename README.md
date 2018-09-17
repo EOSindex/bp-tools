@@ -7,17 +7,25 @@
 
 ## Purpose
 This script is to alert if head_block_time of a EOS blockchain behind a given http/s endpoint is up to date. In the case of
-head_block_time is MAX_ALLOWED_DELAY_SECONDS (default 60 seconds) older than current system utc timestamp, this script would trigger an email alert assuming something bad is happening, e.g. either the local blockchain is not full synced with global 
-blockchain, or the global blockchain is halted for whatever reason.
+head_block_time is MAX_ALLOWED_DELAY_SECONDS (default 60 seconds) older than current system utc timestamp, this script would 
+trigger an email and/or slack alert assuming something bad is happening, e.g. either the local blockchain is not full synced 
+with global blockchain, or the global blockchain is halted for whatever reason.
+
+To be used with cron (and not getting spammed with error messages) this script uses a notification lock. After an alert has 
+been sent, this script will no longer alert you. The lock is automatically removed as soon as the endpoint is available and
+the blockchain is synced again, so you will be notified about future problems.
 
 ## Prerequisite
-If you don't have mail service configed on your host yet, please refer to [configure a Linux server to send email](https://rianjs.net/2013/08/send-email-from-linux-server-using-gmail-and-ubuntu-two-factor-authentication)
+If you don't have mail service configed on your host yet, please refer to [configure a Linux server to send email](https://rianjs.net/2013/08/send-email-from-linux-server-using-gmail-and-ubuntu-two-factor-authentication).
 
+In case you want to use slack, you need to [install and configure slacktee](https://github.com/coursehero/slacktee).
+
+You might need to install the `requests` module, using `pip install requests`.
 
 ## How to use it
 **$ python alert_head_block_freshness.py -h**
 
-usage: alert_head_block_freshness.py [-h] [-he HTTP_ENDPOINT] -ae ALERT_EMAIL
+usage: alert_head_block_freshness.py [-h] [-he HTTP_ENDPOINT] [-dl] -ae ALERT_EMAIL -as SLACKTEE
 
 Check data freshness of a given blockchain based on http/s call
 
@@ -28,12 +36,18 @@ optional arguments:
   
   -he HTTP_ENDPOINT, --http_endpoint HTTP_ENDPOINT
                         http endpoint to check against
+                        
+  -dl, --disable_lock
+                        disable the notification lock, alerts will always be sent
 
 
-required arguments:
+required arguments (at least one of --alert_email and  is required):
 
   -ae ALERT_EMAIL, --alert_email ALERT_EMAIL
                         email address to send alert to
+
+  -as SLACKTEE, --alert_slack SLACKTEE
+                        path to the slacktee executable (always use the full path for cronjobs)
 
 
 ## Alert example

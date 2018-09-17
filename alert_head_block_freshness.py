@@ -107,10 +107,12 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Check data freshness of a given blockchain based on http/s call')
     parser.add_argument('-he', '--http_endpoint', help='http endpoint to check against',
                         default='http://127.0.0.1:80/v1/chain/get_info')
-    parser.add_argument('-ae', '--alert_email', help='email address to send alert to')
-    parser.add_argument('-as', '--alert_slack', help='path to slacktee executable')
     parser.add_argument('-dl', '--disable_lock', help='disable the notification lock, alerts will always be sent',
                         action='store_true')
+
+    requiredArg = parser.add_argument_group('required arguments (at least one of --alert_email and --alert_slack is required)')
+    requiredArg.add_argument('-ae', '--alert_email', help='email address to send alert to')
+    requiredArg.add_argument('-as', '--alert_slack', help='path to slacktee executable')
 
     args = parser.parse_args()
     options = vars(args)
