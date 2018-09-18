@@ -17,17 +17,21 @@ from datetime import datetime
 MAX_ALLOWED_DELAY_SECONDS = 60
 
 
-def alert_head_block_freshness(http_endpoint, alert_email, alert_slack, disable_lock):
+def alert_head_block_freshness(http_endpoint, alert_email, alert_slack, notification_lock):
     """
     Keyword arguments:
     http_endpoint -- http endpoint of a blockchain node (full node or producer node)
     alert_email -- email address to send an alert in case of stale chain
+    alert_slack -- path to slacktee executable
+    notification_lock -- if true create lockfile for notifications
     """
 
     print "\n**********************************"
     print "current time = ", datetime.utcnow()
     print "https_endpoint =", http_endpoint
     print "alert_email =", alert_email
+    print "alert_slack =", alert_slack
+    print "notification_lock =", notification_lock
 
     r = None
 
@@ -36,7 +40,7 @@ def alert_head_block_freshness(http_endpoint, alert_email, alert_slack, disable_
     except:
         print('An error occured when connect to http/s endpoint.')
 
-    if disable_lock is True:
+    if notification_lock is False:
         lock = False
     else:
         lock = os.path.isfile('notified.lock')
@@ -60,7 +64,7 @@ def alert_head_block_freshness(http_endpoint, alert_email, alert_slack, disable_
                 os.system('echo "Failed RPC call to http/s endpoint = {http_endpoint}" | {slack}'
                           .format(http_endpoint=http_endpoint, slack=alert_slack))
 
-            if disable_lock is False:
+            if notification_lock is True:
                 open('notified.lock', 'a').close()
 
         sys.exit(1)
@@ -93,13 +97,13 @@ def alert_head_block_freshness(http_endpoint, alert_email, alert_slack, disable_
                     'echo "Out of sync BP node behind endpoint = {endpoint}" | {slack}'
                     .format(endpoint=http_endpoint, slack=alert_slack))
 
-            if disable_lock is False:
+            if notification_lock is True:
                 open('notified.lock', 'a').close()
 
         sys.exit(1)
 
     # nodeos is available and synced, remove the notification lock again
-    if os.path.isfile('notified.lock') and disable_lock is False:
+    if os.path.isfile('notified.lock') and notification_lock is True:
         os.remove('notified.lock')
 
 
@@ -107,8 +111,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Check data freshness of a given blockchain based on http/s call')
     parser.add_argument('-he', '--http_endpoint', help='http endpoint to check against',
                         default='http://127.0.0.1:80/v1/chain/get_info')
-    parser.add_argument('-dl', '--disable_lock', help='disable the notification lock, alerts will always be sent',
-                        action='store_true')
+    parser.add_argument('-nl', '--notification_lock', help='uses a notification lock, alerts will only be sent once',
+                        action='store_true', default=False)
 
     requiredArg = parser.add_argument_group('required arguments (at least one of --alert_email and --alert_slack is required)')
     requiredArg.add_argument('-ae', '--alert_email', help='email address to send alert to')
@@ -121,4 +125,4 @@ if __name__ == "__main__":
         parser.error('At least one of --alert_email and --alert_slack is required')
 
     alert_head_block_freshness(options.get('http_endpoint'), options.get('alert_email'),
-                               options.get('alert_slack'), options.get('disable_lock'))
+                               options.get('alert_slack'), options.get('notification_lock'))
